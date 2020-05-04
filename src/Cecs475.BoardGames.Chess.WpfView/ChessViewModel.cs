@@ -239,7 +239,7 @@ namespace Cecs475.BoardGames.Chess.WpfView
 
         public bool CanUndo => mBoard.MoveHistory.Any();
 
-     
+        public NumberOfPlayers Players { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name)

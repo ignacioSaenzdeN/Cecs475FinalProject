@@ -25,9 +25,41 @@ namespace Cecs475.BoardGames.ComputerOpponent {
 		}
 
 		private static MinimaxBestMove FindBestMove(IGameBoard b, long alpha, long beta, int depthLeft) {
-			return new MinimaxBestMove() {
-				Move = null
-			};
+			//return new MinimaxBestMove() {
+			//	Move = null
+			//};
+			return minimax(b, 6, b.CurrentPlayer == 1);
+		}
+		
+
+		private static MinimaxBestMove  minimax( IGameBoard board,int depth, bool isMaximizing)
+		{
+			
+			if (depth==0|| board.IsFinished)
+				return new MinimaxBestMove() { Weight = board.BoardWeight,  Move= null };
+
+			long bestWeight = (board.CurrentPlayer == 1) ? long.MinValue : long.MaxValue;
+			IGameMove bestMove = null;
+
+			foreach(var move in board.GetPossibleMoves())
+			{
+				board.ApplyMove(move);
+				var w = minimax(board, depth - 1, !isMaximizing);
+				board.UndoLastMove();
+				if (isMaximizing && w.Weight>bestWeight)
+				{
+					bestWeight = w.Weight;
+					bestMove = move;
+				}
+				else if (!isMaximizing&& w.Weight < bestWeight)
+				{
+					bestWeight = w.Weight;
+					bestMove = move;
+				}
+			}
+			return new MinimaxBestMove() { Weight = bestWeight, Move = bestMove };
+					
+
 		}
 
 	}

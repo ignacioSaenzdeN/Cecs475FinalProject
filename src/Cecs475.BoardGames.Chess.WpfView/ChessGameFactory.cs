@@ -34,5 +34,10 @@ namespace Cecs475.BoardGames.Chess.WpfView
         {
             return new ChessView();
         }
+
+        public IWpfGameView CreateGameView(NumberOfPlayers players)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

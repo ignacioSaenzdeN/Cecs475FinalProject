@@ -44,7 +44,7 @@ namespace Cecs475.BoardGames.TicTacToe.Model {
 		public GameAdvantage CurrentAdvantage => new GameAdvantage(mValue == 0 ? 0 : mValue > 0 ? 1 : 2, mValue);
 
 		IReadOnlyList<IGameMove> IGameBoard.MoveHistory => MoveHistory;
-        public long BoardWeight => throw new NotImplementedException();
+        public long BoardWeight =>this.Weight;
         public void ApplyMove(TicTacToeMove m) {
 			SetPosition(m.Position, CurrentPlayer);
 			mWeight += mPlayer * mWeights[m.Position.Row, m.Position.Col];
