@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using Cecs475.BoardGames.ComputerOpponent;
+using System.Threading.Tasks;
 
 namespace Cecs475.BoardGames.Chess.WpfView
 {
@@ -97,7 +99,9 @@ namespace Cecs475.BoardGames.Chess.WpfView
         private ChessPiece bishop;
         private ChessPiece rook;
         private ChessPiece knight;
-       
+        private const int MAX_AI_DEPTH = 4;
+        private IGameAi mGameAi = new MinimaxAi(MAX_AI_DEPTH);
+
         public ChessPiece Queen
         {
             get { return queen; }
@@ -160,18 +164,32 @@ namespace Cecs475.BoardGames.Chess.WpfView
         /// <summary>
         /// Applies a move for the current player at the given position.
         /// </summary>
-        public void ApplyMove(ChessMove cmove)
+        public async Task ApplyMove(ChessMove cmove)
         {
             var possMoves = mBoard.GetPossibleMoves() as IEnumerable<ChessMove>;
             // Validate the move as possible.
             if (possMoves.Contains(cmove))
                 mBoard.ApplyMove(cmove);
+
+            if (Players == NumberOfPlayers.One && !mBoard.IsFinished)
+            {
+                var bestMove =  Task.Run(()=> { return mGameAi.FindBestMove(mBoard); } );
+                var temp = await bestMove;
+                if (bestMove != null)
+                {
+                    
+                    mBoard.ApplyMove(temp as ChessMove);
+                }
+            }
             RebindState();
             if (mBoard.IsFinished)
             {
                 GameFinished?.Invoke(this, new EventArgs());
             }
+           
         }
+
+
         private void RebindState()
         {
             Queen = new ChessPiece(ChessPieceType.Queen, CurrentPlayer);
@@ -234,12 +252,12 @@ namespace Cecs475.BoardGames.Chess.WpfView
         /// <summary>
         /// The value of the othello board.
         /// </summary>
-
+        public long BoardWeight => mBoard.BoardWeight;
         public GameAdvantage BoardAdvantage => mBoard.CurrentAdvantage;
 
         public bool CanUndo => mBoard.MoveHistory.Any();
 
-        public NumberOfPlayers Players { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public NumberOfPlayers Players { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string name)
@@ -252,6 +270,9 @@ namespace Cecs475.BoardGames.Chess.WpfView
             if (CanUndo)
             {
                 mBoard.UndoLastMove();
+
+                if (Players == NumberOfPlayers.One && CanUndo)
+                    mBoard.UndoLastMove();
                 RebindState();
             }
         }

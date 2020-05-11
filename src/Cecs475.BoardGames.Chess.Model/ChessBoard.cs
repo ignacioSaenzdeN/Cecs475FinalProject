@@ -27,7 +27,11 @@ namespace Cecs475.BoardGames.Chess.Model
 
         // TODO: Add a means of tracking miscellaneous board state, like captured pieces and the 50-move rule.
 
-
+        public IEnumerable<ChessMove> mMoves =null;
+        public ISet<BoardPosition> mAttackedPositions1 = null;
+        public ISet<BoardPosition> mAttackedPositions2 = null;
+        public List<BoardPosition> lAttackedPosition1 = null;
+        public List<BoardPosition> lAttackedPosition2 = null;
         // TODO: add a field for tracking the current player and the board advantage.		
         public struct CurrentGameState
         {
@@ -199,6 +203,8 @@ namespace Cecs475.BoardGames.Chess.Model
         #region Public methods.
         public IEnumerable<ChessMove> GetPossibleMoves()
         {
+            if (mMoves != null)
+                return mMoves;
             List<ChessMove> possible_moves_total = new List<ChessMove>();
             //king_possible_moves = new List<ChessMove>();
             int enemy_player = (CurrentPlayer == 1) ? 2 : 1;
@@ -494,7 +500,7 @@ namespace Cecs475.BoardGames.Chess.Model
             ListCurrentGameStates.RemoveAt(ListCurrentGameStates.Count() - 1);
             ListCurrentGameStates.Add(currentgame);
             //final_moves.Add(new ChessMove(new BoardPosition(7, 4), new BoardPosition(7, 2)));
-            return final_moves;
+            return mMoves =final_moves;
         }
 
         public int ValueOfPiece(ChessPiece piece)
@@ -524,6 +530,7 @@ namespace Cecs475.BoardGames.Chess.Model
             SetPieceAtPosition(end, moving_piece);
             CurrentGameState nCurrentGame;
 
+          
             if (ListCurrentGameStates.Count == 0)
                 nCurrentGame = currentGame;
             else
@@ -602,8 +609,15 @@ namespace Cecs475.BoardGames.Chess.Model
             // puts piece at end position in the piece captured field of the struct
             nCurrentGame.piece_captured = target_piece;
             nCurrentGame = CheckCastling(moving_piece, m, nCurrentGame);
+
+
+          
             ListCurrentGameStates.Add(nCurrentGame);
             mMoveHistory.Add(m);
+            mMoves = null;
+            mAttackedPositions1 = null;
+            mAttackedPositions2 = null;
+
         }
 
         public void UndoLastMove()
@@ -669,6 +683,9 @@ namespace Cecs475.BoardGames.Chess.Model
                 else  
                     nCurrentGame.advantage += ValueOfPiece(GetPieceAtPosition(startPosition)) - 1;
             }
+            mMoves = null;
+            mAttackedPositions1 = null;
+            mAttackedPositions2 = null;
         }
 
         /// <summary>
@@ -676,7 +693,6 @@ namespace Cecs475.BoardGames.Chess.Model
         /// </summary>
         public ChessPiece GetPieceAtPosition(BoardPosition position)
         {
-
             int a = position.Row * 4;
             int b = (position.Col / 2);
             byte byte_at_pos = Cboard[a + b];
@@ -689,7 +705,7 @@ namespace Cecs475.BoardGames.Chess.Model
             //technically the las two lanes should be wrapped in the else statement. However, the result is the same
             else
                 piece_val -= 8;
-                return new ChessPiece((ChessPieceType)piece_val, 2);
+            return new ChessPiece((ChessPieceType)piece_val, 2);
         }
 
         /// <summary>
@@ -754,12 +770,24 @@ namespace Cecs475.BoardGames.Chess.Model
                 return false;
             return GetAttackedPositions(byPlayer).Contains(position);
         }
+        public bool PositionIsAttacked(BoardPosition position, int byPlayer, ISet<BoardPosition> attacked_pos)
+        {
+            if (!PositionInBounds(position))
+                return false;
+            return attacked_pos.Contains(position);
+        }
 
         /// <summary>
         /// Returns a set of all BoardPositions that are attacked by the given player.
         /// </summary>
         public ISet<BoardPosition> GetAttackedPositions(int byPlayer)
         {
+
+            if (mAttackedPositions1 != null && byPlayer == 1)
+                return mAttackedPositions1;
+            else if (mAttackedPositions2 != null && byPlayer == 2)
+                return mAttackedPositions2;
+
             List<BoardPosition> list_attack_position = new List<BoardPosition>();
             for (int i = 0; i < Cboard.Length * 2; i++)
             {
@@ -767,13 +795,23 @@ namespace Cecs475.BoardGames.Chess.Model
                 int row = i / 8;
                 BoardPosition curr = new BoardPosition(row, column);
                 if (GetPieceAtPosition(curr).Player == byPlayer)
-                {
+                { 
                     IEnumerable<BoardPosition> attack_positions = ChessMove.GetMoves4Piece(curr, this);
                     foreach (BoardPosition current_pos in attack_positions)
+                    {
                         list_attack_position.Add(current_pos);
+                    }
                 }
             }
+            if (byPlayer == 1)
+                lAttackedPosition1 = list_attack_position;
+            else if (byPlayer == 2)
+                lAttackedPosition2 = list_attack_position;
             ISet<BoardPosition> ans = new HashSet<BoardPosition>(list_attack_position);
+            if (byPlayer == 1)
+                return mAttackedPositions1 = ans;
+            else if (byPlayer == 2)
+                return mAttackedPositions2 = ans;
             return ans;
         }
         #endregion
@@ -809,8 +847,79 @@ namespace Cecs475.BoardGames.Chess.Model
         void IGameBoard.ApplyMove(IGameMove m) =>ApplyMove(m as ChessMove);      
         IReadOnlyList<IGameMove> IGameBoard.MoveHistory => mMoveHistory;
         // You will need to change this later.
-        public long BoardWeight => CurrentAdvantage.Player == 1 ?
-            CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
+        //public long BoardWeight => CurrentAdvantage.Player == 1 ?
+        //    CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
+        public long BoardWeight
+        {
+            get
+            {
+                
+                long temp = CurrentAdvantage.Player == 1 ? CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
+                long temp2 = CurrentAdvantage.Player == 1 ? CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
+                ISet<BoardPosition> attacked_1 = GetAttackedPositions(1);
+                ISet<BoardPosition> attacked_2 = GetAttackedPositions(2);
+                List<BoardPosition> attacked_1_list = this.lAttackedPosition1;
+                List<BoardPosition> attacked_2_list = this.lAttackedPosition2;
+                for (int row = 0; row < 8; row++)
+                    for (int col = 0; col < 8; col++)
+                    {
+                        BoardPosition curr_position = new BoardPosition(row, col);
+                        ChessPiece current_piece = GetPieceAtPosition(curr_position);
+
+                        //PAWN ADVANCEMENT
+                        if (current_piece.PieceType.Equals(ChessPieceType.Pawn))
+                            if (current_piece.Player.Equals(1))
+                                temp +=( 6 - row);
+                            else if (current_piece.Player.Equals(2))
+                                temp2 += (row - 1);
+
+                        if (current_piece.PieceType.Equals(ChessPieceType.Knight) || current_piece.PieceType.Equals(ChessPieceType.Bishop))
+                        {
+                            Console.WriteLine(curr_position);
+                            Console.WriteLine(attacked_1_list.Where(pos => pos.Equals(curr_position)).Count());
+                        }
+                        ////PIECE PROTECTS
+                        if (current_piece.PieceType.Equals(ChessPieceType.Knight) || current_piece.PieceType.Equals(ChessPieceType.Bishop))
+                            if (current_piece.Player.Equals(1))
+                                temp += attacked_1_list.Where(pos => pos.Equals(curr_position)).Count();
+                            else if (current_piece.Player.Equals(2))
+                                temp2 += attacked_2_list.Where(pos => pos.Equals(curr_position)).Count();
+
+                        ////PIECE THREATS
+                        if (current_piece.PieceType.Equals(ChessPieceType.Knight) || current_piece.PieceType.Equals(ChessPieceType.Bishop))
+                            if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
+                                temp2++;
+                            else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
+                                temp++;
+
+                            else if ((current_piece.PieceType.Equals(ChessPieceType.Rook)))
+                                if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
+                                    temp2 += 2;
+                                else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
+                                    temp += 2;
+
+                                else if ((current_piece.PieceType.Equals(ChessPieceType.Queen)))
+                                    if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
+                                        temp2 += 5;
+                                    else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
+                                        temp += 5;
+
+                                    else if ((current_piece.PieceType.Equals(ChessPieceType.King)))
+                                        if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
+                                            temp2 += 4;
+                                        else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
+                                            temp += 4;
+                    }
+
+                // MessageBox.Show(temp);
+                // Console.WriteLine(temp);
+                return temp-temp2;
+            }
+
+            //private set { BoardWeight = value; };
+
+        }
+
         #endregion
 
         // You may or may not need to add code to this constructor.

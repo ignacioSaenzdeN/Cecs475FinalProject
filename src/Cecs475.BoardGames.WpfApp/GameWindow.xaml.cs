@@ -35,6 +35,7 @@ namespace Cecs475.BoardGames.WpfApp {
 					Converter = factory.CreateCurrentPlayerConverter()
 				}
 			);
+			
 		}
 
 		// Invoked when a game is complete, as reported by its view model.
@@ -43,6 +44,8 @@ namespace Cecs475.BoardGames.WpfApp {
 		}
 
 		private void UndoButton_Click(object sender, RoutedEventArgs e) {
+			//if (!IsEnabled)
+			//	return;
 			(FindResource("ViewModel") as IGameViewModel).UndoMove();
 		}
 	}

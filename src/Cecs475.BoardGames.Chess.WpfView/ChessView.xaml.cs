@@ -33,6 +33,8 @@ namespace Cecs475.BoardGames.Chess.WpfView
 
         private void Border_LeftClickDown(object sender, MouseEventArgs e)
         {
+            if (!this.IsEnabled)
+                return;
             if (selected_square != null)
                 selected_square.IsSelected = false;
             Border b = sender as Border;
@@ -45,6 +47,8 @@ namespace Cecs475.BoardGames.Chess.WpfView
 
         private void Border_HoverMouseEnter(object sender, MouseEventArgs e)
         {
+            if (!this.IsEnabled)
+                return;
             Border b = sender as Border;
             var square = b.DataContext as ChessSquare;
             hovered_square = square;
@@ -63,12 +67,14 @@ namespace Cecs475.BoardGames.Chess.WpfView
         }
         private void Border_HoverMouseLeave(object sender, MouseEventArgs e)
         {
+            if (!this.IsEnabled)
+                return;
             Border b = sender as Border;
             var square = b.DataContext as ChessSquare;
             square.IsHovered = false;
         }
 
-        private void Border_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void Border_MouseUp(object sender, MouseButtonEventArgs e)
         {
             Border b = sender as Border;
             var square = b.DataContext as ChessSquare;
@@ -83,10 +89,13 @@ namespace Cecs475.BoardGames.Chess.WpfView
                         pawn_promote_window.Show();                                             
                         break;
                     }
-                    vm.ApplyMove(move);
+                    this.IsEnabled = false;
+                    await vm.ApplyMove(move);
+                    this.IsEnabled = true;
                     selected_square.IsSelected = false;
                 }
             }
+            MessageBox.Show(vm.BoardWeight.ToString());
         }
 
         public ChessViewModel ChessViewModel => FindResource("vm") as ChessViewModel;
