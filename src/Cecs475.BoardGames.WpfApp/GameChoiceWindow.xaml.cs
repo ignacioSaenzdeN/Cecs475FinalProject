@@ -14,21 +14,26 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Path = System.IO.Path;
 
-namespace Cecs475.BoardGames.WpfApp {
-	/// <summary>
-	/// Interaction logic for GameChoiceWindow.xaml
-	/// </summary>
-	public partial class GameChoiceWindow : Window {
-		public GameChoiceWindow() {
+namespace Cecs475.BoardGames.WpfApp
+{
+    /// <summary>
+    /// Interaction logic for GameChoiceWindow.xaml
+    /// </summary>
+    public partial class GameChoiceWindow : Window
+    {
+        public GameChoiceWindow()
+        {
             Type IWpfGameFactory_Type = typeof(IWpfGameFactory);
-            //List<Assembly> allAssemblies = new List<Assembly
             IEnumerable<Type> tempGameTypes = new List<Type>();
             List<IWpfGameFactory> GameTypes = new List<IWpfGameFactory>();
             string path = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\games\\";
+
             foreach (string dll in Directory.GetFiles(path, "*.dll"))
             {
-                Assembly.LoadFrom(dll);
+                var file_name = Path.GetFileNameWithoutExtension(dll);
+                Assembly.Load(file_name + ", Version=\"1.0.0.0\", Culture = \"neutral\", PublicKeyToken=\"68e71c13048d452a\"");
                 tempGameTypes = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => IWpfGameFactory_Type.IsAssignableFrom(t) && t.IsClass);
@@ -36,38 +41,30 @@ namespace Cecs475.BoardGames.WpfApp {
             }
             foreach (var temp in tempGameTypes)
             {
-                //temp is the more specific type of each IWpfGameFactory i.e. ChessGameFactory (types of classes that extend IWpfGameFactory)
-                //proof: Console.WriteLine(temp);
-                //Activator.CreateInstance Creates an instance of the specified type using the constructor that best matches the specified parameters.
                 GameTypes.Add((IWpfGameFactory)Activator.CreateInstance(temp, new Object[] { }));
             }
-            //Convert list GameTypes into an array to give the resources of window a sequence of objects  
             IWpfGameFactory[] gamest = GameTypes.ToArray();
-            //Give resources an array with key GameTypes
             this.Resources["GameTypes"] = gamest;
             InitializeComponent();
         }
 
-		private void Button_Click(object sender, RoutedEventArgs e) {
-			Button b = sender as Button;
-			// Retrieve the game type bound to the button
-			IWpfGameFactory gameType = b.DataContext as IWpfGameFactory;
-            // Construct a GameWindow to play the game.
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Button b = sender as Button;
+            IWpfGameFactory gameType = b.DataContext as IWpfGameFactory;
             var gameWindow = new GameWindow(gameType,
                 mHumanBtn.IsChecked.Value ? NumberOfPlayers.Two : NumberOfPlayers.One)
             {
                 Title = gameType.GameName
-			};
-			// When the GameWindow closes, we want to show this window again.
-			gameWindow.Closed += GameWindow_Closed;
+            };
+            gameWindow.Closed += GameWindow_Closed;
+            gameWindow.Show();
+            this.Hide();
+        }
 
-			// Show the GameWindow, hide the Choice window.
-			gameWindow.Show();
-			this.Hide();
-		}
-
-		private void GameWindow_Closed(object sender, EventArgs e) {
-			this.Show();
-		}
-	}
+        private void GameWindow_Closed(object sender, EventArgs e)
+        {
+            this.Show();
+        }
+    }
 }

@@ -170,14 +170,15 @@ namespace Cecs475.BoardGames.Chess.WpfView
             // Validate the move as possible.
             if (possMoves.Contains(cmove))
                 mBoard.ApplyMove(cmove);
-
-            if (Players == NumberOfPlayers.One && !mBoard.IsFinished)
+            RebindState();
+            if (Players == NumberOfPlayers.One && !mBoard.IsFinished&&this.CurrentPlayer==2)
             {
+                this.canundo = false;
                 var bestMove =  Task.Run(()=> { return mGameAi.FindBestMove(mBoard); } );
                 var temp = await bestMove;
+                this.canundo = true;
                 if (bestMove != null)
                 {
-                    
                     mBoard.ApplyMove(temp as ChessMove);
                 }
             }
@@ -255,7 +256,16 @@ namespace Cecs475.BoardGames.Chess.WpfView
         public long BoardWeight => mBoard.BoardWeight;
         public GameAdvantage BoardAdvantage => mBoard.CurrentAdvantage;
 
-        public bool CanUndo => mBoard.MoveHistory.Any();
+        private bool canundo = true;
+        //public bool CanUndo => mBoard.MoveHistory.Any();
+
+        public bool CanUndo
+        {
+            get { return (mBoard.MoveHistory.Any() && canundo); }
+            set {
+                canundo = value;
+                OnPropertyChanged(nameof(CanUndo)); ; }
+        }
 
         public NumberOfPlayers Players { get; set; }
 
@@ -267,6 +277,9 @@ namespace Cecs475.BoardGames.Chess.WpfView
 
         public void UndoMove()
         {
+            ChessView temp = new ChessView();
+            if (!temp.IsEnabled)
+                return;
             if (CanUndo)
             {
                 mBoard.UndoLastMove();

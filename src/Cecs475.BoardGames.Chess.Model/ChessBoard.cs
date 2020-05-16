@@ -27,7 +27,7 @@ namespace Cecs475.BoardGames.Chess.Model
 
         // TODO: Add a means of tracking miscellaneous board state, like captured pieces and the 50-move rule.
 
-        public IEnumerable<ChessMove> mMoves =null;
+        public IEnumerable<ChessMove> mMoves = null;
         public ISet<BoardPosition> mAttackedPositions1 = null;
         public ISet<BoardPosition> mAttackedPositions2 = null;
         public List<BoardPosition> lAttackedPosition1 = null;
@@ -90,7 +90,7 @@ namespace Cecs475.BoardGames.Chess.Model
         {
             get
             {
-                if (IsCheckmate||IsStalemate||IsDraw)
+                if (IsCheckmate || IsStalemate || IsDraw)
                     return true;
                 return false;
             }
@@ -99,7 +99,7 @@ namespace Cecs475.BoardGames.Chess.Model
         public int CurrentPlayer
         {
             get
-            { 
+            {
                 return (mMoveHistory.Count % 2 == 0) ? 1 : 2;
             }
         }
@@ -130,10 +130,10 @@ namespace Cecs475.BoardGames.Chess.Model
                     return false;
 
                 int enemy_player = (CurrentPlayer == 1) ? 2 : 1;
-                    BoardPosition king_pos = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
-                    return PositionIsAttacked(king_pos, enemy_player);
+                BoardPosition king_pos = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
+                return PositionIsAttacked(king_pos, enemy_player);
                 return false;
-               
+
             }
         }
 
@@ -156,9 +156,9 @@ namespace Cecs475.BoardGames.Chess.Model
                 //return true;
                 int enemy_player = (CurrentPlayer == 1) ? 2 : 1;
                 BoardPosition king_pos = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
-                if (PositionIsAttacked(king_pos,enemy_player) &&GetPossibleMoves().Count() == 0)
+                if (PositionIsAttacked(king_pos, enemy_player) && GetPossibleMoves().Count() == 0)
                     return true;
-                    
+
                 return false;
             }
         }
@@ -170,7 +170,7 @@ namespace Cecs475.BoardGames.Chess.Model
                 if (ListCurrentGameStates[ListCurrentGameStates.Count() - 1].checkmate == true)
                     return false;
                 int enemy_player = (CurrentPlayer == 1) ? 2 : 1;
-                if (GetPossibleMoves().Count ()== 0&&!IsCheck)
+                if (GetPossibleMoves().Count() == 0 && !IsCheck)
                     return true;
                 return false;
             }
@@ -232,7 +232,7 @@ namespace Cecs475.BoardGames.Chess.Model
                     bool front_pos_2 = false;
                     if (pawn_pos.Row - 2 > 0)
                         front_pos_2 = GetPieceAtPosition(new BoardPosition(pawn_pos.Row - 2, pawn_pos.Col)).PieceType.Equals(ChessPieceType.Empty);
-                  
+
                     // en passant movement left white player capturing black pawn
                     if (mMoveHistory.Count > 0)
                     {
@@ -250,7 +250,7 @@ namespace Cecs475.BoardGames.Chess.Model
                             }
                         }
                         // en passant movement right of white player capturing black pawn
-                        if ( pawn_pos.Col < 7)
+                        if (pawn_pos.Col < 7)
                         {
                             ChessPiece side_piece_right = GetPieceAtPosition(new BoardPosition(pawn_pos.Row, pawn_pos.Col + 1));
                             ChessMove passant_trigger_move_right = new ChessMove(new BoardPosition(pawn_pos.Row - 2, pawn_pos.Col + 1),
@@ -284,7 +284,7 @@ namespace Cecs475.BoardGames.Chess.Model
 
                     foreach (BoardPosition attack_pos in ChessMove.GetPawnMoves(pawn_pos, this))
                     {
-                        if (GetPlayerAtPosition(attack_pos).Equals(enemy_player)&&!pawn_pos.Row.Equals(1))
+                        if (GetPlayerAtPosition(attack_pos).Equals(enemy_player) && !pawn_pos.Row.Equals(1))
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessMoveType.Normal));
                         else if (GetPlayerAtPosition(attack_pos).Equals(enemy_player) && pawn_pos.Row.Equals(1))
                         {
@@ -320,7 +320,7 @@ namespace Cecs475.BoardGames.Chess.Model
                 {
                     bool front_pos_1 = GetPieceAtPosition(new BoardPosition(pawn_pos.Row + 1, pawn_pos.Col)).PieceType.Equals(ChessPieceType.Empty);
                     bool front_pos_2 = false;
-                    if (pawn_pos.Row+2<8)
+                    if (pawn_pos.Row + 2 < 8)
                         front_pos_2 = GetPieceAtPosition(new BoardPosition(pawn_pos.Row + 2, pawn_pos.Col)).PieceType.Equals(ChessPieceType.Empty);
 
                     if (mMoveHistory.Count > 0)
@@ -375,22 +375,23 @@ namespace Cecs475.BoardGames.Chess.Model
                     }
                     foreach (BoardPosition attack_pos in ChessMove.GetPawnMoves(pawn_pos, this))
                     {
-                        if (GetPlayerAtPosition(attack_pos).Equals(enemy_player)&& !pawn_pos.Row.Equals(6))
+                        if (GetPlayerAtPosition(attack_pos).Equals(enemy_player) && !pawn_pos.Row.Equals(6))
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessMoveType.Normal));
-                        else if (GetPlayerAtPosition(attack_pos).Equals(enemy_player) && pawn_pos.Row.Equals(6)) {
+                        else if (GetPlayerAtPosition(attack_pos).Equals(enemy_player) && pawn_pos.Row.Equals(6))
+                        {
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessMoveType.PawnPromote));
                             //possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessPieceType.Queen, ChessMoveType.PawnPromote));
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessPieceType.Bishop, ChessMoveType.PawnPromote));
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessPieceType.Rook, ChessMoveType.PawnPromote));
                             possible_moves_total.Add(new ChessMove(pawn_pos, attack_pos, ChessPieceType.Knight, ChessMoveType.PawnPromote));
                         }
-                            
+
                     }
                 }
 
             }
             BoardPosition white_king_position = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
-            if (CurrentPlayer == 1 &&white_king_position.Equals(new BoardPosition(7,4 )))
+            if (CurrentPlayer == 1 && white_king_position.Equals(new BoardPosition(7, 4)))
             {
                 //WHITE KING SIDE CASTLING  
                 ChessPiece right_one_piece = GetPieceAtPosition(new BoardPosition(white_king_position.Row, white_king_position.Col + 1));
@@ -401,7 +402,7 @@ namespace Cecs475.BoardGames.Chess.Model
                 if (right_one_piece.PieceType.Equals(ChessPieceType.Empty) && right_two_piece.PieceType.Equals(ChessPieceType.Empty) &&
                                                     !(ListCurrentGameStates[ListCurrentGameStates.Count - 1].white_right_rook) &&
                                                     !(ListCurrentGameStates[ListCurrentGameStates.Count - 1].white_king) && !(IsCheck) &&
-                                                    !PositionIsAttacked(right_one_pos, enemy_player) && !PositionIsAttacked(right_two_pos, enemy_player)&&
+                                                    !PositionIsAttacked(right_one_pos, enemy_player) && !PositionIsAttacked(right_two_pos, enemy_player) &&
                                                     GetPieceAtPosition(new BoardPosition(7, 7)).PieceType.Equals(ChessPieceType.Rook))
                 {
                     ChessMove king_side_castle_move = new ChessMove(white_king_position, right_two_pos, ChessMoveType.CastleKingSide);
@@ -411,10 +412,10 @@ namespace Cecs475.BoardGames.Chess.Model
                 //WHITE QUEEN SIDE CASTLING
                 ChessPiece left_one_piece = GetPieceAtPosition(new BoardPosition(white_king_position.Row, white_king_position.Col - 1));
                 ChessPiece left_two_piece = GetPieceAtPosition(new BoardPosition(white_king_position.Row, white_king_position.Col - 2));
-                ChessPiece left_three_piece = GetPieceAtPosition(new BoardPosition(7,1));
+                ChessPiece left_three_piece = GetPieceAtPosition(new BoardPosition(7, 1));
 
                 BoardPosition left_one_pos = new BoardPosition(white_king_position.Row, white_king_position.Col - 1);
-                
+
                 BoardPosition left_two_pos = new BoardPosition(white_king_position.Row, white_king_position.Col - 2);
                 BoardPosition left_three_pos = new BoardPosition(white_king_position.Row, white_king_position.Col - 3);
 
@@ -424,7 +425,7 @@ namespace Cecs475.BoardGames.Chess.Model
                                                     !(ListCurrentGameStates[ListCurrentGameStates.Count - 1].white_left_rook) &&
                                                     !(ListCurrentGameStates[ListCurrentGameStates.Count - 1].white_king) && !(IsCheck) &&
                                                     !PositionIsAttacked(left_one_pos, enemy_player) && !PositionIsAttacked(left_two_pos, enemy_player) &&
-                                                    //!PositionIsAttacked(left_three_pos, enemy_player)&&
+                                                     //!PositionIsAttacked(left_three_pos, enemy_player)&&
                                                      GetPieceAtPosition(new BoardPosition(7, 0)).PieceType.Equals(ChessPieceType.Rook))
 
                 {
@@ -433,8 +434,8 @@ namespace Cecs475.BoardGames.Chess.Model
                 }
 
             }
-           
-            else if (CurrentPlayer==2&& GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First().Equals(new BoardPosition(0,4)))   
+
+            else if (CurrentPlayer == 2 && GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First().Equals(new BoardPosition(0, 4)))
             {
                 //BLACK KING SIDE CASTLING// left = queen side=right
                 BoardPosition black_king_position = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
@@ -475,13 +476,13 @@ namespace Cecs475.BoardGames.Chess.Model
                 }
             }
             // king normal move
-            
+
             BoardPosition king_pos = GetPositionsOfPiece(ChessPieceType.King, CurrentPlayer).First();
             foreach (BoardPosition attack_position in ChessMove.GetMoves4Piece(king_pos, this))
             {
                 bool isEnemy_and_not_attacked = !PositionIsAttacked(attack_position, enemy_player) && !GetPlayerAtPosition(attack_position).Equals(CurrentPlayer);
                 bool isEmpty_and_no_attacked = PositionIsEmpty(attack_position) && !PositionIsAttacked(attack_position, enemy_player);
-                if (isEnemy_and_not_attacked|| isEmpty_and_no_attacked)
+                if (isEnemy_and_not_attacked || isEmpty_and_no_attacked)
                     possible_moves_total.Add(new ChessMove(king_pos, attack_position, ChessMoveType.Normal));
             }
 
@@ -500,14 +501,14 @@ namespace Cecs475.BoardGames.Chess.Model
             ListCurrentGameStates.RemoveAt(ListCurrentGameStates.Count() - 1);
             ListCurrentGameStates.Add(currentgame);
             //final_moves.Add(new ChessMove(new BoardPosition(7, 4), new BoardPosition(7, 2)));
-            return mMoves =final_moves;
+            return mMoves = final_moves;
         }
 
         public int ValueOfPiece(ChessPiece piece)
         {
             if (piece.PieceType.Equals(ChessPieceType.Pawn))
                 return 1;
-            else if (piece.PieceType.Equals(ChessPieceType.Knight)|| piece.PieceType.Equals(ChessPieceType.Bishop))
+            else if (piece.PieceType.Equals(ChessPieceType.Knight) || piece.PieceType.Equals(ChessPieceType.Bishop))
                 return 3;
             else if (piece.PieceType.Equals(ChessPieceType.Rook))
                 return 5;
@@ -530,7 +531,7 @@ namespace Cecs475.BoardGames.Chess.Model
             SetPieceAtPosition(end, moving_piece);
             CurrentGameState nCurrentGame;
 
-          
+
             if (ListCurrentGameStates.Count == 0)
                 nCurrentGame = currentGame;
             else
@@ -551,19 +552,22 @@ namespace Cecs475.BoardGames.Chess.Model
             }
 
             //Castling
-            if (m.MoveType.Equals(ChessMoveType.CastleKingSide)&& CurrentPlayer == 1)
+            if (m.MoveType.Equals(ChessMoveType.CastleKingSide) && CurrentPlayer == 1)
             {
                 //ChessPiece white_rook_right = GetPieceAtPosition(new BoardPosition(7, 7));
                 ChessPiece white_rook_right = new ChessPiece(ChessPieceType.Rook, 1);
                 SetPieceAtPosition(new BoardPosition(7, 5), white_rook_right);
                 SetPieceAtPosition(new BoardPosition(7, 7), ChessPiece.Empty);
-            }else if (m.MoveType.Equals(ChessMoveType.CastleQueenSide) && CurrentPlayer == 1)
+            }
+            else if (m.MoveType.Equals(ChessMoveType.CastleQueenSide) && CurrentPlayer == 1)
             {
                 //ChessPiece white_rook_left = GetPieceAtPosition(new BoardPosition(7, 0));
                 ChessPiece white_rook_left = new ChessPiece(ChessPieceType.Rook, 1);
                 SetPieceAtPosition(new BoardPosition(7, 3), white_rook_left);
                 SetPieceAtPosition(new BoardPosition(7, 0), ChessPiece.Empty);
-            }else if (m.MoveType.Equals(ChessMoveType.CastleKingSide) && CurrentPlayer == 2) {
+            }
+            else if (m.MoveType.Equals(ChessMoveType.CastleKingSide) && CurrentPlayer == 2)
+            {
                 ChessPiece black_rook_right = new ChessPiece(ChessPieceType.Rook, 2);
                 SetPieceAtPosition(new BoardPosition(0, 5), black_rook_right);
                 SetPieceAtPosition(new BoardPosition(0, 7), ChessPiece.Empty);
@@ -583,7 +587,7 @@ namespace Cecs475.BoardGames.Chess.Model
                 ChessPiece promotion;
                 if (m.promoteTo.Equals(ChessPieceType.Empty))
                     promotion = new ChessPiece(ChessPieceType.Queen, CurrentPlayer);
-                else 
+                else
                     promotion = new ChessPiece(m.promoteTo, CurrentPlayer);
 
                 SetPieceAtPosition(end, promotion);
@@ -611,7 +615,7 @@ namespace Cecs475.BoardGames.Chess.Model
             nCurrentGame = CheckCastling(moving_piece, m, nCurrentGame);
 
 
-          
+
             ListCurrentGameStates.Add(nCurrentGame);
             mMoveHistory.Add(m);
             mMoves = null;
@@ -646,7 +650,7 @@ namespace Cecs475.BoardGames.Chess.Model
 
             mMoveHistory.RemoveAt(mMoveHistory.Count - 1);
             ListCurrentGameStates.RemoveAt(ListCurrentGameStates.Count - 1);
-                
+
 
             // Undo castling in general
             if (moveType.Equals(ChessMoveType.CastleKingSide))
@@ -663,9 +667,9 @@ namespace Cecs475.BoardGames.Chess.Model
                 ChessPiece rook_left = new ChessPiece(ChessPieceType.Rook, CurrentPlayer);
                 SetPieceAtPosition(new BoardPosition(row, 3), ChessPiece.Empty);
                 SetPieceAtPosition(new BoardPosition(row, 0), rook_left);
-            }    
+            }
             //undo en passant
-           else if (moveType.Equals(ChessMoveType.EnPassant))
+            else if (moveType.Equals(ChessMoveType.EnPassant))
             {
                 int capture_direction = ((endPosition.Col - startPosition.Col) > 0) ? 1 : -1;
                 int pawn_enemy_player = (CurrentPlayer == 1) ? 2 : 1;
@@ -673,14 +677,14 @@ namespace Cecs475.BoardGames.Chess.Model
                 SetPieceAtPosition(new BoardPosition(startPosition.Row, startPosition.Col + capture_direction), enemy_pawn);
             }
 
-           else if (moveType.Equals(ChessMoveType.PawnPromote))
+            else if (moveType.Equals(ChessMoveType.PawnPromote))
             {
-                
-                ChessPiece pawn= new ChessPiece(ChessPieceType.Pawn, CurrentPlayer);
+
+                ChessPiece pawn = new ChessPiece(ChessPieceType.Pawn, CurrentPlayer);
                 SetPieceAtPosition(startPosition, pawn);
                 if (CurrentPlayer == 1)
-                    nCurrentGame.advantage -= ValueOfPiece(GetPieceAtPosition(startPosition)) + 1;              
-                else  
+                    nCurrentGame.advantage -= ValueOfPiece(GetPieceAtPosition(startPosition)) + 1;
+                else
                     nCurrentGame.advantage += ValueOfPiece(GetPieceAtPosition(startPosition)) - 1;
             }
             mMoves = null;
@@ -738,7 +742,7 @@ namespace Cecs475.BoardGames.Chess.Model
         /// <summary>
         /// Returns true if the given position is in the bounds of the board.
         /// </summary>
-        public static bool PositionInBounds(BoardPosition pos)=> ((pos.Col >= 0 && pos.Col < 8) && (pos.Row >= 0 && pos.Row < 8));
+        public static bool PositionInBounds(BoardPosition pos) => ((pos.Col >= 0 && pos.Col < 8) && (pos.Row >= 0 && pos.Row < 8));
 
         /// <summary>
         /// Returns all board positions where the given piece can be found.
@@ -795,7 +799,7 @@ namespace Cecs475.BoardGames.Chess.Model
                 int row = i / 8;
                 BoardPosition curr = new BoardPosition(row, column);
                 if (GetPieceAtPosition(curr).Player == byPlayer)
-                { 
+                {
                     IEnumerable<BoardPosition> attack_positions = ChessMove.GetMoves4Piece(curr, this);
                     foreach (BoardPosition current_pos in attack_positions)
                     {
@@ -843,17 +847,13 @@ namespace Cecs475.BoardGames.Chess.Model
         #endregion
 
         #region Explicit IGameBoard implementations.
-        IEnumerable<IGameMove> IGameBoard.GetPossibleMoves()=> GetPossibleMoves();
-        void IGameBoard.ApplyMove(IGameMove m) =>ApplyMove(m as ChessMove);      
+        IEnumerable<IGameMove> IGameBoard.GetPossibleMoves() => GetPossibleMoves();
+        void IGameBoard.ApplyMove(IGameMove m) => ApplyMove(m as ChessMove);
         IReadOnlyList<IGameMove> IGameBoard.MoveHistory => mMoveHistory;
-        // You will need to change this later.
-        //public long BoardWeight => CurrentAdvantage.Player == 1 ?
-        //    CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
         public long BoardWeight
         {
             get
             {
-                
                 long temp = CurrentAdvantage.Player == 1 ? CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
                 long temp2 = CurrentAdvantage.Player == 1 ? CurrentAdvantage.Advantage : -CurrentAdvantage.Advantage;
                 ISet<BoardPosition> attacked_1 = GetAttackedPositions(1);
@@ -869,15 +869,10 @@ namespace Cecs475.BoardGames.Chess.Model
                         //PAWN ADVANCEMENT
                         if (current_piece.PieceType.Equals(ChessPieceType.Pawn))
                             if (current_piece.Player.Equals(1))
-                                temp +=( 6 - row);
+                                temp += (6 - row);
                             else if (current_piece.Player.Equals(2))
                                 temp2 += (row - 1);
 
-                        if (current_piece.PieceType.Equals(ChessPieceType.Knight) || current_piece.PieceType.Equals(ChessPieceType.Bishop))
-                        {
-                            Console.WriteLine(curr_position);
-                            Console.WriteLine(attacked_1_list.Where(pos => pos.Equals(curr_position)).Count());
-                        }
                         ////PIECE PROTECTS
                         if (current_piece.PieceType.Equals(ChessPieceType.Knight) || current_piece.PieceType.Equals(ChessPieceType.Bishop))
                             if (current_piece.Player.Equals(1))
@@ -891,7 +886,6 @@ namespace Cecs475.BoardGames.Chess.Model
                                 temp2++;
                             else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
                                 temp++;
-
                             else if ((current_piece.PieceType.Equals(ChessPieceType.Rook)))
                                 if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
                                     temp2 += 2;
@@ -903,21 +897,14 @@ namespace Cecs475.BoardGames.Chess.Model
                                         temp2 += 5;
                                     else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
                                         temp += 5;
-
                                     else if ((current_piece.PieceType.Equals(ChessPieceType.King)))
                                         if (PositionIsAttacked(curr_position, 2, attacked_2) && current_piece.Player.Equals(1))
                                             temp2 += 4;
                                         else if (PositionIsAttacked(curr_position, 1, attacked_1) && current_piece.Player.Equals(2))
                                             temp += 4;
                     }
-
-                // MessageBox.Show(temp);
-                // Console.WriteLine(temp);
-                return temp-temp2;
+                return temp - temp2;
             }
-
-            //private set { BoardWeight = value; };
-
         }
 
         #endregion

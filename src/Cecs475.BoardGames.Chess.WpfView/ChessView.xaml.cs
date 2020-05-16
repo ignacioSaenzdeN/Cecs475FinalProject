@@ -89,13 +89,14 @@ namespace Cecs475.BoardGames.Chess.WpfView
                         pawn_promote_window.Show();                                             
                         break;
                     }
+                    Border_HoverMouseLeave(sender, e);
+                    selected_square.IsSelected = false;
                     this.IsEnabled = false;
                     await vm.ApplyMove(move);
                     this.IsEnabled = true;
-                    selected_square.IsSelected = false;
+
                 }
             }
-            MessageBox.Show(vm.BoardWeight.ToString());
         }
 
         public ChessViewModel ChessViewModel => FindResource("vm") as ChessViewModel;

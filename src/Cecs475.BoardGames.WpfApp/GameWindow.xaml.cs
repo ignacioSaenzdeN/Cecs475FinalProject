@@ -15,7 +15,6 @@ namespace Cecs475.BoardGames.WpfApp {
             var gameView = factory.CreateGameView(players);
             this.Resources.Add("GameView", gameView.ViewControl);
 			this.Resources.Add("ViewModel", gameView.ViewModel);
-
 			// Register an event handler for when the game is finished.
 			gameView.ViewModel.GameFinished += ViewModel_GameFinished;
 
@@ -44,8 +43,8 @@ namespace Cecs475.BoardGames.WpfApp {
 		}
 
 		private void UndoButton_Click(object sender, RoutedEventArgs e) {
-			//if (!IsEnabled)
-			//	return;
+			if (!this.IsEnabled)
+				return;
 			(FindResource("ViewModel") as IGameViewModel).UndoMove();
 		}
 	}
